@@ -1,4 +1,19 @@
-(ns compojure-auth.models.user)
+(ns compojure-auth.models.user
+  (:use [compojure-auth.db :as db]))
 
-(defn current_user
-  ())
+(defn all []
+  (db/q? ["SELECT * FROM users"]))
+
+(defn exists? [username password]
+  (let [results (db/q? ["SELECT id FROM users WHERE username = ? AND password = ?" username password])]
+    (if (nil? (first results))
+      false
+      true)))
+
+;; Obviously the password needs to be hashed but just testing
+(defn add [user]
+  ^{:doc "Add a user to the database"}
+  (let [{:keys [username password]} user]
+    (db/insert! :users
+      {:username username :password password})))
+    
