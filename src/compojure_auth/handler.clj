@@ -1,27 +1,29 @@
 (ns compojure-auth.handler
   (:use [compojure.core]
-        [compojure-auth.models.user :as user]
         [compojure-auth.views.layout :as layout]
-        [ring.middleware.session :as session])
-  (:require [compojure.handler :as handler]
+        [ring.middleware.session :only (wrap-session)]
+        [ring.util.response :only (response)])
+  (:require [ring.adapter.jetty :as jetty]
             [compojure.route :as route]))
 
-(defn login-user
-  [params session]
-  (let [username (get params "username")
-        password (get params "password")]
-  (if (user/exists? username password)
-    (do
-      (assoc session :user_id 1)
-      (str "Found user" session))
-    "No user found")))
+(defn counter-handler [req]
+  (let [cnt (inc (-> req :session (:counter 0)))
+        res (response (format "You visited %d times:\n\n%s"
+                       cnt (with-out-str (println req))))]
+    (assoc-in res [:session :counter] cnt)))
 
 (defroutes app-routes
-  (GET "/" {session :session} (layout/login session))
-  (POST "/login" {session :session form-params :form-params} (login-user form-params session))
-                                                       
+  (route/resources "/")
   (route/not-found "Not Found"))
 
+(defn log-request [app]
+  (fn [req]
+    (println req)
+    (app req)))
+
 (def app
-  (-> (handler/site app-routes)
-      session/wrap-session app-routes))
+  (-> counter-handler
+      wrap-session))
+
+(defn start-server []
+  (future (jetty/run-jetty (var app) {:port 8080})))
