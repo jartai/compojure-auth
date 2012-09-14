@@ -9,6 +9,13 @@
 
 ;; Login examples
 
+;; Helper methods
+
+(defn logged-in? []
+  (if (session/get :user)
+    true
+    false))
+
 (defn find-authorized-user
   "Mocking db call"
   [user password]
@@ -19,29 +26,34 @@
   ;; check if the user exists, if so add user id to session
   (if (= (.toLowerCase user) "owain")
     (do (session/put! :user user)
-        (response/redirect "/session"))
+        (response/redirect "/"))
     (session/flash-put! :errors "Invalid user")))
+
+(defn index-page
+  []
+  (if (logged-in?)
+    "You are logged in"
+    "Please log in <a href='/login'>Login</a>"))
 
 (defn  logout []
    (do (session/remove! :user)
        (response/redirect "/")))
 
+(defroutes resource-routes
+  (-> (route/resources "/*")))
+
 (defroutes app-routes
+
+  (GET "/" [] (index-page))
   
-  (GET "/" []
+  (GET "/login" []
     (layout/login-form))
 
-  (GET "/session" []
-       (let [session (session/get :user)]
-      (str "session is: " session)))
-  
   (POST "/login" {{:keys [user password]} :form-params}
     (login "owain" password))
-
   (GET "/logout" []
-    (logout))
-  
-  (route/resources "/")
+       (logout))
+  (route/resources "/*")
   (route/not-found "Not Found"))
 
 (def app
