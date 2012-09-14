@@ -5,6 +5,7 @@
         [ring.adapter.jetty :as jetty])
   (:require [compojure.route :as route]
             [noir.session :as session]
+            [compojure-auth.models.user :as user]
             [ring.util.response :as response]))
 
 ;; Login examples
@@ -16,15 +17,10 @@
     true
     false))
 
-(defn find-authorized-user
-  "Mocking db call"
-  [user password]
-  (boolean (and (= user "owain")
-                (= password "password"))))
-
 (defn login [user password]
   ;; check if the user exists, if so add user id to session
-  (if (= (.toLowerCase user) "owain")
+  ;; TODO encryption, flash messages
+  (if (user/exists? "owainlewis" "testing")
     (do (session/put! :user user)
         (response/redirect "/"))
     (session/flash-put! :errors "Invalid user")))
@@ -43,12 +39,9 @@
   (-> (route/resources "/*")))
 
 (defroutes app-routes
-
   (GET "/" [] (index-page))
-  
   (GET "/login" []
     (layout/login-form))
-
   (POST "/login" {{:keys [user password]} :form-params}
     (login "owain" password))
   (GET "/logout" []
