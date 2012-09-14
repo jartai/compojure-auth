@@ -1,11 +1,11 @@
 (ns compojure-auth.handler
   (:use [compojure.core]
         [ring.middleware.session.memory :only [memory-store]]
-        [compojure-auth.views.layout :as layout]
-        [compojure-auth.models.user :only (exists?)]
-        [ring.adapter.jetty :as jetty])
+        [compojure-auth.models.user :only (exists?)])
   (:require [compojure.route :as route]
             [noir.session :as session]
+            [ring.adapter.jetty :as jetty]
+            [compojure-auth.views.layout :as layout]
             [ring.util.response :as response]))
 
 ;; Login examples
