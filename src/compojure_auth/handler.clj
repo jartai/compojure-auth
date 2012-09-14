@@ -2,10 +2,10 @@
   (:use [compojure.core]
         [ring.middleware.session.memory :only [memory-store]]
         [compojure-auth.views.layout :as layout]
+        [compojure-auth.models.user :only (exists?)]
         [ring.adapter.jetty :as jetty])
   (:require [compojure.route :as route]
             [noir.session :as session]
-            [compojure-auth.models.user :as user]
             [ring.util.response :as response]))
 
 ;; Login examples
@@ -20,7 +20,7 @@
 (defn login [user password]
   ;; check if the user exists, if so add user id to session
   ;; TODO encryption, flash messages
-  (if (user/exists? "owainlewis" "testing")
+  (if (exists? "owainlewis" "testing")
     (do (session/put! :user user)
         (response/redirect "/"))
     (session/flash-put! :errors "Invalid user")))
