@@ -13,13 +13,13 @@
   
 (defn login-form  []
   (main-layout
-    [:h1 "Username: "]
-    [:div {:id "login"}
+   [:div {:id "login"}
+      [:h2 "Login"]
       (form-to [:post "/login"]        
         (label :user "Username")
         (text-field :user)
         (label :password "Password")
         (password-field :password)
-        [:button {:type "submit"} "Log In"])
+        [:button {:class "btn-blue" :type "submit"} "Log In"])
      ]))
  
