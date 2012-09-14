@@ -1,5 +1,5 @@
 (ns compojure-auth.views.layout
-  (:use [hiccup core page]))
+  (:use [hiccup core page form]))
 
 (defn main-layout [& content]
   (html5
@@ -11,14 +11,15 @@
      [:div {:class "container"}
        content]]))
   
-(defn login [session]
+(defn login-form  []
   (main-layout
+    [:h1 "Username: "]
     [:div {:id "login"}
-    [:form {:method "POST" :action "/login"}
-      [:label "Username"]
-      [:input {:type "text" :name "username"}]
-      [:label "Password"]
-      [:input {:type "text" :name "password"}]
-      [:input {:type "submit" :class "btn" :value "Login"}]
-    ]]))
-   
+      (form-to [:post "/login"]        
+        (label :user "Username")
+        (text-field :user)
+        (label :password "Password")
+        (password-field :password)
+        [:button {:type "submit"} "Log In"])
+     ]))
+ 
