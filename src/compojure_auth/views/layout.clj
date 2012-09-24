@@ -5,8 +5,8 @@
   (html5
     [:head
       [:title "Compojure Auth"]
-      (include-css "/css/style.css")
-      (include-css "/css/main.css")]
+      (include-css "css/style.css")
+      (include-css "css/main.css")]
     [:body
      [:div {:class "container"}
        content]]))

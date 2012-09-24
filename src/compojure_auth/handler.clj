@@ -12,7 +12,6 @@
 ;; Login examples
 
 ;; Helper methods
-
 (defn logging-middleware
   "Generic logging middleware"
   [app]
@@ -30,11 +29,15 @@
     true
     false))
 
+;; TODO
+
+;; 1. Crypt
+;; 2. Flash messages
+;; 3. Security 
+
 (defn login [params]
   (let [user (get params "user")
         pass (get params "password")]
-    ;; check if the user exists, if so add user id to session
-    ;; TODO encryption, flash messages
   (if (exists? user pass)
     (do (session/put! :user_id 1)
         (response/redirect "/"))
@@ -68,7 +71,7 @@
   (GET "/logout" []
     (logout))
   
-  (route/resources "/*")
+  (route/resources "/")
   (route/not-found "Not Found"))
 
 (def app
