@@ -12,6 +12,11 @@
 
 ;; Helper methods
 
+(defn logging-middleware [app]
+  (fn [req]
+    (println req)
+    (app req)))
+
 (defn logged-in? []
   (if (session/get :user)
     true
@@ -23,12 +28,14 @@
   (if (exists? "owainlewis" "testing")
     (do (session/put! :user user)
         (response/redirect "/"))
-    (session/flash-put! :errors "Invalid user")))
+    (do
+      (session/flash-put! :errors "Invalid user")
+      (response/redirect "/login"))))
 
 (defn index-page
   []
   (if (logged-in?)
-    "You are logged in"
+    "You are logged in <a href='/logout'>Logout</a>"
     "Please log in <a href='/login'>Login</a>"))
 
 (defn  logout []
@@ -43,7 +50,7 @@
   (GET "/login" []
     (layout/login-form))
   (POST "/login" {{:keys [user password]} :form-params}
-    (login "owain" password))
+    (login user password))
   (GET "/logout" []
        (logout))
   (route/resources "/*")
@@ -51,7 +58,9 @@
 
 (def app
   (-> app-routes
-      (session/wrap-noir-session {:store (memory-store)})))
+      logging-middleware
+      (session/wrap-noir-session {:store (memory-store)})
+      (session/wrap-noir-flash)))
 
 (defn start-server []
   (future (jetty/run-jetty (var app) {:port 8080})))
