@@ -1,19 +1,9 @@
 # compojure-auth
 
-FIXME
+I found decent examples for login/logout functionality in Compojure hard to come by or outdated. Hopefully these examples will serve as a useful guide to simple user authentication in Compojure/Ring apps. 
 
-## Prerequisites
+## Getting started (TODO)
 
-You will need [Leiningen][1] 1.7.0 or above installed.
+1. First we need to create the database 
+2. Add a user
 
-[1]: https://github.com/technomancy/leiningen
-
-## Running
-
-To start a web server for the application, run:
-
-    lein ring server
-
-## License
-
-Copyright © 2012 FIXME
