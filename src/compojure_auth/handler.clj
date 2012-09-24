@@ -17,10 +17,8 @@
   [app]
   (fn [req]
     (println
-      (str "\nBegin "
-      (get req :request-method)
-      " "
-      (get req :uri) "\n"))
+      (str "\nBegin " (get req :request-method) " "
+        (get req :uri) "\n"))
     (println req)
     (app req)))
 
@@ -49,7 +47,7 @@
   []
   (if (logged-in?)
     "You are logged in <a href='/logout'>Logout</a>"
-    "Please log in <a href='/login'>Login</a>"))
+    (response/redirect "/login")))
 
 (defn  logout []
    (do (session/remove! :user_id)
