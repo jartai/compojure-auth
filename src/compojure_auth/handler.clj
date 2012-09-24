@@ -1,82 +1,84 @@
 (ns compojure-auth.handler
   (:use [compojure.core]
-        [ring.middleware.session.memory :only [memory-store]]
-        [compojure-auth.models.user :only (exists?)]
-        [ring.middleware.params :only [wrap-params]])
-  (:require [compojure.route :as route]
-            [noir.session :as session]
+        [compojure-auth.models.user]) 
+  (:require [compojure.handler :as handler]
+            [compojure.route :as route]   
             [ring.adapter.jetty :as jetty]
             [compojure-auth.views.layout :as layout]
             [ring.util.response :as response]))
 
-;; Login examples
+;; Session helpers
 
-;; Helper methods
+(defn session-set
+  [k v] )
+
+(defn session-get
+  [k])
+
+;; Middleware
+
 (defn logging-middleware
   "Generic logging middleware"
-  [app]
+  [handler]
   (fn [req]
-    (println
-      (str "\nBegin " (get req :request-method) " "
-        (get req :uri) "\n"))
     (println req)
-    (app req)))
+      (handler req)))
 
-(defn logged-in? []
-  (if (session/get :user_id)
-    true
-    false))
-
-;; TODO
-
-;; 1. Crypt
-;; 2. Flash messages
-;; 3. Security 
-
-(defn login [params]
-  (let [user (get params "user")
-        pass (get params "password")]
-  (if (exists? user pass)
-    (do (session/put! :user_id 1)
-        (response/redirect "/"))
-    (do
-      (session/flash-put! :errors "Invalid user")
-      (response/redirect "/login")))))
-
-(defn index-page
-  []
-  (if (logged-in?)
-    "You are logged in <a href='/logout'>Logout</a>"
-    (response/redirect "/login")))
-
-(defn  logout []
-   (do (session/remove! :user_id)
-       (response/redirect "/")))
-
-(defroutes resource-routes
-  (-> (route/resources "/*")))
-
-(defroutes auth-routes
+(defn get-user
+  [{:keys [params]}]
+  (exists? (:user params) (:password params)))
   
-  (GET "/" [] (index-page))
+(defn login [req]
+  (let [user (get-user req)
+        url (if user "/" "/login")]
+  (assoc-in (response/redirect url)
+            [:session :user] user)))
+
+(defn logout [req]
+  (merge (response/redirect "/") {:session nil}))
+
+(defn logged-in? [req]
+  (get-in req [:session :user] false))
+
+(defn with-auth [handler]
+  (fn [req]
+    (let [login-path "/login"]
+    (if (logged-in? req)
+        (handler req)
+        (response/redirect login-path)))))
+
+(declare current-user) 
+
+(defn with-user-binding [handler] 
+  (fn [request] 
+    (binding [current-user (-> request :session :user)] 
+      (handler request)))) 
+
+(def index-page
+  (str "You are logged in as " current-user " <a href='/logout'>Logout</a>"))
+
+;; Application routes
+
+(defroutes page-routes
   
-  (GET "/login" []
-    (layout/login-form))
+  (GET "/" [] index-page))
+
+(defroutes main-routes
   
-  (POST "/login" {params :params}
-    (login params))
-  
-  (GET "/logout" []
-    (logout))
+  (GET "/login"  [] (layout/login-form))
+  (POST "/login" [] login)
+  (ANY "/logout" [] logout)
+
+  (with-auth page-routes)
   
   (route/resources "/")
   (route/not-found "Not Found"))
 
 (def app
-  (-> (wrap-params auth-routes)
+  (-> main-routes
       logging-middleware
-      (session/wrap-noir-session {:store (memory-store)})
-      (session/wrap-noir-flash)))
+      with-user-binding
+      (handler/site :session)))
 
 (defn start-server []
   (future (jetty/run-jetty (var app) {:port 8080})))

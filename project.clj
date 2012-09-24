@@ -11,5 +11,4 @@
   :plugins [[lein-ring "0.7.3"]
             [lein-swank "1.4.4"]]
   :ring {:handler compojure-auth.handler/app}
-  :profiles
-  {:dev {:dependencies [[ring-mock "0.1.3"]]}})
+  :profiles {:dev {:dependencies [[ring-mock "0.1.3"]]}})

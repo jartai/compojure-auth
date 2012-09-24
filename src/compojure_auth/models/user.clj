@@ -5,10 +5,10 @@
   (db/q? ["SELECT * FROM users"]))
 
 (defn exists? [username password]
-  (let [results (db/q? ["SELECT id FROM users WHERE username = ? AND password = ?" username password])]
-    (if (nil? (first results))
-      false
-      true)))
+  (let [results
+        (db/q? ["SELECT id FROM users WHERE username = ? AND password = ?"
+          username password])]
+   (first results)))
 
 ;; Obviously the password needs to be hashed but just testing
 (defn add [user]
