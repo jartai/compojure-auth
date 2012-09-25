@@ -1,19 +1,23 @@
 (ns compojure-auth.models.user
-  (:use [compojure-auth.db :as db]))
+  (:refer-clojure :exclude [compare])
+  (:use [compojure-auth.db :as db]
+        [noir.util.crypt :as crypt]))
 
 (defn all []
   (db/q? ["SELECT * FROM users"]))
 
 (defn exists? [username password]
-  (let [results
-        (db/q? ["SELECT id FROM users WHERE username = ? AND password = ?"
-          username password])]
-   (first results)))
+  "If a user exists return selected fields else return false"
+  (let [pw (crypt/encrypt password)
+        results
+        (db/q? ["SELECT id, username FROM users WHERE username = ?" username])]
+   (if (crypt/compare password pw)
+     (first results)
+     false)))
 
-;; Obviously the password needs to be hashed but just testing
 (defn add [user]
   ^{:doc "Add a user to the database"}
   (let [{:keys [username password]} user]
     (db/insert! :users
-      {:username username :password password})))
+      {:username username :password (crypt/encrypt password)})))
     
