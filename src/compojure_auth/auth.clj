@@ -5,6 +5,7 @@
             [ring.util.response :as response]))
 
 (defn logged-in? [req]
+  "Returns true if a user is logged in or false"
   (get-in req [:session :user] false))
 
 (defn with-auth [handler]

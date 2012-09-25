@@ -16,11 +16,10 @@
     [:password "varchar(255)"]))
 
 (defmacro with-conn [& body]
-  `(sql/with-connection (db "classify")
+  `(sql/with-connection (db "compojure")
      (do ~@body)))
 
 (defn create []
-  ^{:doc "Create the database schema for the classifier"}
   (with-conn
     (create-database)))
 
