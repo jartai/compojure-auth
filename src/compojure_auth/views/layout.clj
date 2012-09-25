@@ -21,5 +21,4 @@
         (label :password "Password")
         (password-field :password)
         [:button {:class "btn-blue" :type "submit"} "Log In"])
-     ]))
- 
+     ])) 

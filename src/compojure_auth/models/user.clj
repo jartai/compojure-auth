@@ -10,4 +10,3 @@
   (let [{:keys [username password]} user]
     (db/insert! :users
       {:username username :password (crypt/encrypt password)})))
-    
