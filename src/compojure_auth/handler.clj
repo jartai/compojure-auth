@@ -16,12 +16,8 @@
     (println req)
       (handler req)))
 
-(defn get-user
-  [params]
-  (auth/exists? (:user params) (:password params)))
-  
 (defn login [req]
-  (let [user (get-user (:params req))
+  (let [user (auth/get-user (:params req))
         home "/"
         url (if user home "/login")]
   (assoc-in (response/redirect url)
@@ -30,27 +26,17 @@
 (defn logout [req]
   (merge (response/redirect "/") {:session nil}))
 
-(declare ^{:dynamic true} current-user)
-
-(defn with-user-binding [handler] 
-  (fn [request] 
-    (binding [current-user (-> request :session :user)] 
-      (handler request)))) 
-
-(defn index-page [handler]
-  (fn [request]
-    (str "Hello " (:username current-user) "! <a href='/logout'>Logout</a>")))
-
 ;; Application routes
 
 (defroutes page-routes
-  (GET "/" [] index-page))
+  (GET "/" [] layout/home-page))
 
-(defroutes main-routes
-  
+(defroutes login-routes
   (GET "/login"  [] (layout/login-form))
   (POST "/login" [] login)
-  (ANY "/logout" [] logout)
+  (ANY "/logout" [] logout))
+
+(defroutes main-routes
 
   (auth/with-auth page-routes)
   
@@ -58,9 +44,9 @@
   (route/not-found "Not Found"))
 
 (def app
-  (-> main-routes
+  (-> (routes login-routes main-routes)
       (logging-middleware)
-      (with-user-binding)
+      (auth/with-user)
       (handler/site :session)))
 
 (defn start-server []

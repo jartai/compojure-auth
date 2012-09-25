@@ -9,7 +9,13 @@
       (include-css "css/main.css")]
     [:body
      [:div {:class "container"}
-       content]]))
+      content]]))
+
+(defn home-page [current-user]
+  (main-layout
+    [:h1 (str "Hello " (:username current-user))]
+      [:p
+        [:a {:href "/logout"} "Logout"]]))
   
 (defn login-form  []
   (main-layout
