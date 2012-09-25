@@ -4,8 +4,7 @@
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
             [ring.adapter.jetty :as jetty]
-            [compojure-auth.views.layout :as layout]
-            [ring.util.response :as response]))
+            [compojure-auth.views.layout :as layout]))
 
 ;; Middleware
 
@@ -16,16 +15,6 @@
     (println req)
       (handler req)))
 
-(defn login [req]
-  (let [user (auth/get-user (:params req))
-        home "/"
-        url (if user home "/login")]
-  (assoc-in (response/redirect url)
-            [:session :user] user)))
-
-(defn logout [req]
-  (merge (response/redirect "/") {:session nil}))
-
 ;; Application routes
 
 (defroutes page-routes
@@ -33,8 +22,8 @@
 
 (defroutes login-routes
   (GET "/login"  [] (layout/login-form))
-  (POST "/login" [] login)
-  (ANY "/logout" [] logout))
+  (POST "/login" [] auth/login)
+  (ANY "/logout" [] auth/logout))
 
 (defroutes main-routes
 

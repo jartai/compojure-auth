@@ -4,11 +4,11 @@
   (:require [noir.util.crypt :as crypt]
             [ring.util.response :as response]))
 
+(declare ^{:dynamic true} current-user)
+
 (defn logged-in? [req]
   "Returns true if a user is logged in or false"
   (get-in req [:session :user] false))
-
-(declare ^{:dynamic true} current-user)
 
 (defn with-user [handler] 
   (fn [request] 
@@ -38,3 +38,15 @@
 (defn get-user
   [params]
   (exists? (:user params) (:password params)))
+
+;; Main login/logout actions
+
+(defn login [req]
+  (let [user (get-user (:params req))
+        home "/"
+        url (if user home "/login")]
+  (assoc-in (response/redirect url)
+            [:session :user] user)))
+
+(defn logout [req]
+  (merge (response/redirect "/") {:session nil}))
