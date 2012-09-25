@@ -35,9 +35,7 @@
      (first results)
      false)))
 
-(defn get-user
-  [params]
-  (exists? (:user params) (:password params)))
+(defn get-user [params] (exists? (:user params) (:password params)))
 
 ;; Main login/logout actions
 
