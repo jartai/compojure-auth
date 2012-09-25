@@ -1,6 +1,7 @@
 (ns compojure-auth.handler
   (:use [compojure.core]
-        [compojure-auth.models.user]) 
+        [compojure-auth.models.user]
+        [compojure-auth.auth :as auth])
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
             [ring.adapter.jetty :as jetty]
@@ -48,21 +49,6 @@
 (defn logout [req]
   (merge (response/redirect "/") {:session nil}))
 
-(defn logged-in? [req]
-  ""
-  (get-in req [:session :user] false))
-
-(defn with-auth [handler]
-  "Authentication handler that redirects if a user is not logged in"
-  (fn [req]
-    (let [login-path "/login"
-          uri (:uri req)]
-      (if (or (logged-in? req)
-              (.startsWith uri "/css")
-              (.startsWith uri "/javascripts"))
-        (handler req)
-        (response/redirect login-path)))))
-
 (declare ^{:dynamic true} *current-user*)
 
 (defn with-user-binding [handler] 
@@ -85,7 +71,7 @@
   (POST "/login" [] login)
   (ANY "/logout" [] logout)
 
-  (with-auth page-routes)
+  (auth/with-auth page-routes)
   
   (route/resources "/")
   (route/not-found "Not Found"))
