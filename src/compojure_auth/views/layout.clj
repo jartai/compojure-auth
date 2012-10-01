@@ -1,6 +1,16 @@
 (ns compojure-auth.views.layout
   (:use [hiccup core page form]))
 
+;; View helper functions
+
+(defn flash-messages
+  "Show flash messages if they exist in a request"
+  [req]
+  (declare flash-message)
+  (if-let [flash-message (:flash req)]
+    [:div {:id "flash"}
+      flash-message]))
+
 (defn main-layout [& content]
   (html5
     [:head
@@ -17,10 +27,11 @@
       [:p
         [:a {:href "/logout"} "Logout"]]))
   
-(defn login-form  []
+(defn login-form  [req]
   (main-layout
    [:div {:id "login"}
-      [:h2 "Login"]
+     [:h2 "Login"]
+     (flash-messages req)
       (form-to [:post "/login"]        
         (label :user "Username")
         (text-field :user)

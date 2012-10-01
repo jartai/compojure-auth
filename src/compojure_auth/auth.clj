@@ -43,8 +43,12 @@
   (let [user (get-user (:params req))
         home "/"
         url (if user home "/login")]
-  (assoc-in (response/redirect url)
-            [:session :user] user)))
+    (assoc-in
+      (assoc (response/redirect url) :flash
+        (if user "Logged in" "User not found"))
+          [:session :user] user)))
 
 (defn logout [req]
-  (merge (response/redirect "/") {:session nil}))
+  (merge
+    (assoc (response/redirect "/") :flash "Logged out")
+     {:session nil}))
